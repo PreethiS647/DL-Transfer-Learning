@@ -98,20 +98,14 @@ print("Image shape:",first_image1.shape)
 # Create DataLoader for batch processing
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-```
-```
 ## Step 2: Load Pretrained Model and Modify for Transfer Learning
 # Load a pre-trained VGG19 model
 from torchvision.models import VGG19_Weights
 model = models.vgg19(weights=VGG19_Weights.DEFAULT)
-```
-```
 # Move model to GPU if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 from torchsummary import summary
-```
-```
 # Print model summary
 summary(model, input_size=(3, 224, 224))
 ```
