@@ -104,6 +104,142 @@ summary(model, input_size=(3, 224, 224))
 ```
 <img width="523" height="333" alt="image" src="https://github.com/user-attachments/assets/ee306a8d-3499-427f-8236-95f8aa415355" />
 
+```
+# Modify the final fully connected layer to match the dataset classes
+# Write your code here
+num_classes = len(train_dataset.classes)
+in_features = model.classifier[-1].in_features
+model.classifier[-1] = nn.Linear(in_features, 1) # Change output features to 1 for binary classification
+model = model.to(device)
+summary(model, input_size=(3, 224, 224))
+
+```
+<img width="541" height="173" alt="image" src="https://github.com/user-attachments/assets/a076d74b-e07e-4f20-b874-b9e7284438c2" />
+
+```
+# Freeze all layers except the final layer
+for param in model.features.parameters():
+    param.requires_grad = False  # Freeze feature extractor layers
+# Include the Loss function and optimizer
+criterion = nn.BCEWithLogitsLoss()
+optimizer = optim.Adam(model.parameters(),lr=0.001)
+```
+
+```
+## Step 3: Train the Model
+def train_model(model, train_loader,test_loader,num_epochs=10):
+    train_losses = []
+    val_losses = []
+    model.train()
+    for epoch in range(num_epochs):
+        running_loss = 0.0
+        for images, labels in train_loader:
+            images, labels = images.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(images)
+            # Reshape labels to match the output shape
+            labels = labels.unsqueeze(1).float()  # Add a dimension and convert to float
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+        train_losses.append(running_loss / len(train_loader))
+
+        # Compute validation loss
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for images, labels in test_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                # Reshape labels to match the output shape
+                labels = labels.unsqueeze(1).float() # Add a dimension and convert to float
+                loss = criterion(outputs, labels)
+                val_loss += loss.item()
+
+        val_losses.append(val_loss / len(test_loader))
+        model.train()
+
+        print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_losses[-1]:.4f}, Validation Loss: {val_losses[-1]:.4f}')
+
+    # Plot training and validation loss
+    print("Name:Preethi S        ")
+    print("Register Number: 212223230157")
+    plt.figure(figsize=(8, 6))
+    plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss', marker='o')
+    plt.plot(range(1, num_epochs + 1), val_losses, label='Validation Loss', marker='s')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Training and Validation Loss')
+    plt.legend()
+    plt.show()
+model = model.to(device)
+train_model(model, train_loader, test_loader)
+```
+
+<img width="507" height="184" alt="image" src="https://github.com/user-attachments/assets/37dfec19-397b-4458-86e6-38e62eae5271" />
+
+
+
+<img width="732" height="609" alt="image" src="https://github.com/user-attachments/assets/01b5113b-d989-4549-af31-82ca4cb7d5bf" />
+
+
+```
+## Step 4: Test the Model and Compute Confusion Matrix & Classification Report
+def test_model(model, test_loader):
+    model.eval()
+    correct = 0
+    total = 0
+    all_preds = []
+    all_labels = []
+
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+            all_preds.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
+    accuracy = correct / total
+    print(f'Test Accuracy: {accuracy:.4f}')
+
+    # Compute confusion matrix
+    cm = confusion_matrix(all_labels, all_preds)
+    print("Name: Preethi S       ")
+    print("Register Number:   212223230157     ")
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=train_dataset.classes, yticklabels=train_dataset.classes)
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+    # Print classification report
+    print("Name:Preethi S        ")
+    print("Register Number: 2122232301557       ")
+    print("Classification Report:")
+    print(classification_report(all_labels, all_preds, target_names=train_dataset.classes))
+# Evaluate the model
+# write your code here
+model = model.to(device)
+test_model(model, test_loader)
+
+
+
+```
+
+<img width="684" height="622" alt="image" src="https://github.com/user-attachments/assets/9510bea8-b581-41e2-ba23-1f3f3905d0fc" />
+
+<img width="481" height="225" alt="image" src="https://github.com/user-attachments/assets/e7b236ba-b68f-40a6-bd14-cacf92c03147" />
+
+
+
+
+
+
 
 ## RESULT
 
