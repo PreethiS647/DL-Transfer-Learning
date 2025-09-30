@@ -236,6 +236,44 @@ test_model(model, test_loader)
 <img width="481" height="225" alt="image" src="https://github.com/user-attachments/assets/e7b236ba-b68f-40a6-bd14-cacf92c03147" />
 
 
+```
+## Step 5: Predict on a Single Image and Display It
+def predict_image(model, image_index, dataset):
+    model.eval()
+    image, label = dataset[image_index]
+    with torch.no_grad():
+        image_tensor = image.unsqueeze(0).to(device)
+        output = model(image_tensor)
+
+        # Apply sigmoid to get probability, threshold at 0.5
+        prob = torch.sigmoid(output)
+        predicted = (prob > 0.5).int().item()
+
+
+    class_names = class_names = dataset.classes
+    # Display the image
+    image_to_display = transforms.ToPILImage()(image)
+    plt.figure(figsize=(4, 4))
+    plt.imshow(image_to_display)
+    plt.title(f'Actual: {class_names[label]}\nPredicted: {class_names[predicted]}')
+    plt.axis("off")
+    plt.show()
+
+    print(f'Actual: {class_names[label]}, Predicted: {class_names[predicted]}')
+# Example Prediction
+predict_image(model, image_index=55, dataset=test_dataset)
+
+```
+<img width="403" height="417" alt="image" src="https://github.com/user-attachments/assets/53109fad-f9c3-45ab-a8de-e857a2f50e47" />
+
+```
+#Example Prediction
+predict_image(model, image_index=25, dataset=test_dataset)
+```
+
+<img width="410" height="421" alt="image" src="https://github.com/user-attachments/assets/94e1d83d-abc0-49ea-9579-63f3435af481" />
+
+
 
 
 
